@@ -204,20 +204,20 @@ Grüß Gott!
 ハロー・ワールド
 </code></pre>
 <pre><pre class="playground"><code class="language-rust  editable edition2021">fn greet_world() {
-    println!(&quot;Hello, world!&quot;);                              // 1
-    let southern_germany = &quot;Grüß Gott!&quot;;                    // 2
-    let korean = &quot;안녕, 세상아!&quot;;                             // 3
-    let japanese = &quot;ハロー・ワールド;
+    println!(&quot;Hello, world!&quot;);                // 1
+    let southern_germany = &quot;Grüß Gott!&quot;;      // 2
+    let korean = &quot;안녕, 세상아!&quot;;               // 3
+    let japanese = &quot;ハロー・ワールド&quot;;
 
-    let regions = [southern_germany, korean, japanese];     // 4
+    let regions = [southern_germany, korean, japanese];  // 4
 
-    for region in regions.iter() {      // 5
-        println!(&quot;{}&quot;, &amp;region);        // 6
+    for region in regions.iter() {  // 5
+        println!(&quot;{}&quot;, &amp;region);    // 6
     }
 }
 
 fn main() {
-    greet_world();      // 7
+    greet_world();  // 7
 }</code></pre></pre>
 <ol>
 <li>느낌표 표시는 매크로를 의미한다. 나중에 알아보자.</li>

@@ -53,20 +53,20 @@ Grüß Gott!
 
 ```rust, editable
 fn greet_world() {
-    println!("Hello, world!");                              // 1
-    let southern_germany = "Grüß Gott!";                    // 2
-    let korean = "안녕, 세상아!";                             // 3
-    let japanese = "ハロー・ワールド;
+    println!("Hello, world!");                // 1
+    let southern_germany = "Grüß Gott!";      // 2
+    let korean = "안녕, 세상아!";               // 3
+    let japanese = "ハロー・ワールド";
 
-    let regions = [southern_germany, korean, japanese];     // 4
+    let regions = [southern_germany, korean, japanese];  // 4
 
-    for region in regions.iter() {      // 5
-        println!("{}", &region);        // 6
+    for region in regions.iter() {  // 5
+        println!("{}", &region);    // 6
     }
 }
 
 fn main() {
-    greet_world();      // 7
+    greet_world();  // 7
 }
 ```
 
