@@ -1,0 +1,221 @@
+<!DOCTYPE HTML>
+<html lang="kr" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Introduction - Study: Rust in Action</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html" class="active">Introduction</a></li><li class="chapter-item expanded "><a href="chapter_01.html"><strong aria-hidden="true">1.</strong> 러스트 소개</a></li><li class="chapter-item expanded affix "><li class="part-title">러스트 언어의 특색</li><li class="chapter-item expanded "><a href="chapter_02.html"><strong aria-hidden="true">2.</strong> 러스트 언어의 기초</a></li><li class="chapter-item expanded "><a href="chapter_03.html"><strong aria-hidden="true">3.</strong> 복합 데이터 타입</a></li><li class="chapter-item expanded "><a href="chapter_04.html"><strong aria-hidden="true">4.</strong> 수명, 소유권, 대여</a></li><li class="chapter-item expanded affix "><li class="part-title">시스템 프로그래밍 이해하기</li><li class="chapter-item expanded "><a href="chapter_05.html"><strong aria-hidden="true">5.</strong> 데이터 심화</a></li><li class="chapter-item expanded "><a href="chapter_06.html"><strong aria-hidden="true">6.</strong> 메모리</a></li><li class="chapter-item expanded "><a href="chapter_07.html"><strong aria-hidden="true">7.</strong> 파일과 저장소</a></li><li class="chapter-item expanded "><a href="chapter_08.html"><strong aria-hidden="true">8.</strong> 네트워킹</a></li><li class="chapter-item expanded "><a href="chapter_09.html"><strong aria-hidden="true">9.</strong> 시간과 시간 관리</a></li><li class="chapter-item expanded "><a href="chapter_10.html"><strong aria-hidden="true">10.</strong> 프로세스, 스레드, 컨테이너</a></li><li class="chapter-item expanded "><a href="chapter_11.html"><strong aria-hidden="true">11.</strong> 커널</a></li><li class="chapter-item expanded "><a href="chapter_12.html"><strong aria-hidden="true">12.</strong> 시그널, 인터럽트, 예외</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Study: Rust in Action</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/jerok-kim/rust_in_action" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <p>#패스트캠퍼스, #국비지원교육, #메가바이트스쿨, #MegabyteSchool, #개발자취업부트캠프, #내일배움카드</p>
+<h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<h2 id="이-작업을-왜-하는가"><a class="header" href="#이-작업을-왜-하는가">이 작업을 왜 하는가?</a></h2>
+<ul>
+<li>'Rust in Action'의 번역서인 '러스트 프로그래밍'은 저를 프로그래밍의 세계로 뛰어들게 만든 책입니다.</li>
+<li>우연히 만난 이 책으로 인해 제 인생은 완전히 다른 방향으로 바뀌게 되었고, 이 책을 만나게 된 것을 정말 감사하게 생각합니다.</li>
+<li>Rust는 제 프로그래밍의 첫 시작이었으며 Rust에 대해 무한한 애정을 갖고 있습니다.</li>
+<li>이 책을 처음 몇번을 읽다가 실패했고, 겨우 한번 완독했지만 내용을 많이 이해하지 못해서 이번 기회에 한번 정리해 보려고 합니다.</li>
+</ul>
+<h2 id="방향과-계획"><a class="header" href="#방향과-계획">방향과 계획</a></h2>
+<ul>
+<li>프로그래머로서의 저의 방향은 &quot;My life for Rust&quot; 이며 이에 대해 장기적으로 Deep Dive 할 계획입니다.</li>
+<li>'Rust'에 관한 책은 많지만, 대부분 영어로 된 책들이고, 정리하는데 많은 시간이 들어갑니다.</li>
+<li>우선은 'Rust in Action', 'Rust Programming Language 2nd Edition', '동시성 프로그래밍'을 좀 건드려 보려고 합니다.</li>
+</ul>
+<h2 id="저장소"><a class="header" href="#저장소">저장소</a></h2>
+<ul>
+<li>Github Repository에 모든 md파일, 작성해본 예제 파일, 빌드 파일들을 저장해 놓았습니다.</li>
+<li>https://github.com/jerok-kim/rust_in_action</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next" href="chapter_01.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next" href="chapter_01.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="editor.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>

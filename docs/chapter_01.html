@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+<html lang="kr" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>러스트 소개 - Study: Rust in Action</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="chapter_01.html" class="active"><strong aria-hidden="true">1.</strong> 러스트 소개</a></li><li class="chapter-item expanded affix "><li class="part-title">러스트 언어의 특색</li><li class="chapter-item expanded "><a href="chapter_02.html"><strong aria-hidden="true">2.</strong> 러스트 언어의 기초</a></li><li class="chapter-item expanded "><a href="chapter_03.html"><strong aria-hidden="true">3.</strong> 복합 데이터 타입</a></li><li class="chapter-item expanded "><a href="chapter_04.html"><strong aria-hidden="true">4.</strong> 수명, 소유권, 대여</a></li><li class="chapter-item expanded affix "><li class="part-title">시스템 프로그래밍 이해하기</li><li class="chapter-item expanded "><a href="chapter_05.html"><strong aria-hidden="true">5.</strong> 데이터 심화</a></li><li class="chapter-item expanded "><a href="chapter_06.html"><strong aria-hidden="true">6.</strong> 메모리</a></li><li class="chapter-item expanded "><a href="chapter_07.html"><strong aria-hidden="true">7.</strong> 파일과 저장소</a></li><li class="chapter-item expanded "><a href="chapter_08.html"><strong aria-hidden="true">8.</strong> 네트워킹</a></li><li class="chapter-item expanded "><a href="chapter_09.html"><strong aria-hidden="true">9.</strong> 시간과 시간 관리</a></li><li class="chapter-item expanded "><a href="chapter_10.html"><strong aria-hidden="true">10.</strong> 프로세스, 스레드, 컨테이너</a></li><li class="chapter-item expanded "><a href="chapter_11.html"><strong aria-hidden="true">11.</strong> 커널</a></li><li class="chapter-item expanded "><a href="chapter_12.html"><strong aria-hidden="true">12.</strong> 시그널, 인터럽트, 예외</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Study: Rust in Action</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/jerok-kim/rust_in_action" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="러스트-소개"><a class="header" href="#러스트-소개">러스트 소개</a></h1>
+<p>러스트가 어디에 사용되는지, 러스트를 실무에서 추천하는지에 대한 내용은 생략한다.</p>
+<h2 id="언어-맛보기"><a class="header" href="#언어-맛보기">언어 맛보기</a></h2>
+<h3 id="hello-world-프로그램을-편법으로-만들어-보기"><a class="header" href="#hello-world-프로그램을-편법으로-만들어-보기">&quot;Hello, world!&quot; 프로그램을 편법으로 만들어 보기</a></h3>
+<p>명령 프롬프트를 열고 다음 명령을 입력해 보자.</p>
+<pre><code class="language-text">C:\&gt; cd %TMP%
+
+$ cargo new hello
+     Created binary (application) `hello` package
+
+$ cd hello
+$ cargo run
+   Compiling hello v0.1.0 (C:\Users\jerok\projects\study_blog\rust_in_action\code\ch01\hello)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.90s                                             
+     Running `target\debug\hello.exe`
+Hello, world!
+</code></pre>
+<p>헬로 월드가 찍혔으니 이제부턴 러스트 개발자이다. 가즈아!</p>
+<p>러스트의 카고(cargo) 도구는 빌드 시스템이면서 패키지 관리자다. 즉, 카고는 러스트 코드를 실행 가능한 바이너리로 변환하며, 프로젝트의 의존성을 다운로드하고 컴파일하는 프로세스도 관리할 수 있다.</p>
+<p><code>cargo new</code>명령은 표준 템플릿을 따르는 프로젝트를 만든다. <code>tree</code>명령을 쓰면 <code>cargo new</code>실행 후 생성되는 프로젝트 구조와 파일을 볼 수 있다. 카고로 만든 러스트 프로젝트의 구조는 전부
+동일하다. 기본 디렉터리에는 <code>Cargo.toml</code>이라는 파일이 있는데 이 파일에는 프로젝트의 이름, 버전, 의존성 같은 메타데이터가 들어 있다. 소스 코드는 <code>src</code>디렉터리에 있다. 러스트 소스 코드의 파일
+확장자는 <code>.rs</code>다. <code>cargo new</code>로 만들어지는 파일을 보려면 <code>tree</code>명령을 쓴다.</p>
+<p>그 다음에 실행했던 명령은 <code>cargo run</code>인데, 이 부분은 실제로 보이는 것 이상으로 많은 일을 했다. 해당 명령을 실행했을 때 실제로는 실행할 수 있는 것이 전혀 없고, 최대한 많은 오류 관련 정보를
+제공하도록 사용자 대신 코드를 디버그 모드로 컴파일하게 설정한다. 여기까지 진행되면 <code>src/main.rs</code>파일은 항상 <code>Hello, world!</code>문구를 출력하는 코드를 포함하게 된다. 컴파일 결과 <code>hello</code>(
+또는 <code>hello.exe</code>)라는 파일이 생성된다.</p>
+<p><code>cargo run</code>을 실행하면 프로젝트에 새로운 파일과 디렉터리가 추가된다. 이제 <code>Cargo.lock</code>파일과 <code>target/</code>디렉터리가 프로젝트의 기본 디렉터리에 추가되었다. 이 파일과 디렉터리는 카고에 의해
+관리된다. 이는 컴파일 과정에서 만들어지는 것들로 이 파일과 디렉터리를 건드릴 필요는 없다.<code>Cargo.lock</code>은 모든 의존성에 대한 정확한 버전 번호를 지정하는 파일로, <code>Cargo.toml</code>파일이 변경되기
+전까지는 이후에도 동일한 방식으로 빌드가 정확히 이루어진다.</p>
+<p><code>tree</code>를 다시 실행하면 <code>hello</code>프로젝트를 컴파일하기 위해 <code>cargo run</code>을 호출해서 생성된 새로운 구조가 나타난다.</p>
+<h3 id="첫-번째-러스트-프로그램"><a class="header" href="#첫-번째-러스트-프로그램">첫 번째 러스트 프로그램</a></h3>
+<p>첫 번째 프로그램으로 다음과 같이 여러 언어로 된 문장을 출력하는 프로그램을 만들려고 한다.</p>
+<pre><code class="language-text">Hello, world!
+Grüß Gott!
+안녕, 세상아!
+ハロー・ワールド
+</code></pre>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn greet_world() {
+    println!(&quot;Hello, world!&quot;);                              // 1
+    let southern_germany = &quot;Grüß Gott!&quot;;                    // 2
+    let korean = &quot;안녕, 세상아!&quot;;                             // 3
+    let japanese = &quot;ハロー・ワールド;
+
+    let regions = [southern_germany, korean, japanese];     // 4
+
+    for region in regions.iter() {      // 5
+        println!(&quot;{}&quot;, &amp;region);        // 6
+    }
+}
+
+fn main() {
+    greet_world();      // 7
+}</code></pre></pre>
+<ol>
+<li>느낌표 표시는 매크로를 의미한다. 나중에 알아보자.</li>
+<li>러스트에서의 할당문이다. 좀 더 정확히 말하자면 <code>let</code>키워드를 이용한 변수 바인딩이다.</li>
+<li>유니코드가 기본으로 제공된다.</li>
+<li>배열 리터럴을 표현할 때는 대괄호(<code>[]</code>)를 쓴다.</li>
+<li>많은 타입에 반복자(iterator)를 반환하는 <code>iter()</code>메서드가 있다.</li>
+<li>앰퍼샌드(<code>&amp;</code>) 기호는 영역 내의 값을 읽기 전용으로 대여(borrow)할 때 사용된다.</li>
+<li>함수를 호출한다. 괄호가 함수명에 붙어 있는 것에 유의한다.</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="introduction.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="chapter_02.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="introduction.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="chapter_02.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="editor.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>
