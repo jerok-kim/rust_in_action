@@ -723,6 +723,432 @@ store_secrets(buffer);</code></pre>
 <li>무비용 추상화(Zero-cost abstractions) - 러스트를 통해 얻을 수 있는 기능들은 런타임 비용이 발생하지 않는다. 러스트로 프로그래밍할 때 안전성을 추구한다고 해서 속도가 희생되지는 않는다.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="러스트-언어의-기초"><a class="header" href="#러스트-언어의-기초">러스트 언어의 기초</a></h1>
+<p>이 장에서는 러스트 프로그래밍의 기본 원리를 소개한다. 이 장을 마치면 명령행 유틸리티를 만들 수 있을 것이며 대부분의 러스트 프로그램에 대한 요지를 파악할 수 있다.</p>
+<p>때때로 맥락 없이 수명 생략(lifetime elision), 깔끔한 매크로, 이동의 의미, 대수적 데이터 타입과 같은 용어에 부딪힐 때 정신이 멍해질 수 있다. 두려워하지 말고 도움을 요청하자. 이런 유용하나
+모호한 용어가 쓰이기는 해도 커뮤니티는 우리를 반겨줄 것이다.</p>
+<p>이 장에서는 grep 유틸리티의 간이 버전인 grep-lite를 만들어 본다. grep-lite 프로그램은 텍스트 내에서 패턴을 찾아 일치하는 줄을 출력한다. 이 간단한 프로그램을 통해 우리는 러스트의 독특한 특징에
+초점을 맞춰 볼 것이다.</p>
+<h2 id="실행-프로그램-만들기"><a class="header" href="#실행-프로그램-만들기">실행 프로그램 만들기</a></h2>
+<p>모든 일반 텍스트 파일에는 놀라운 힘이 숨겨져 있다. 텍스트 파일에 적절한 기호를 포함한다면 CPU로 해석할 수 있는 파일로 변환할 수 있다. 이것이 프로그래밍 언어가 행하는 마술이다. 이 장의 목적은 러스트 소스
+코드를 실행 프로그램으로 변환하는 과정에 익숙해지는 것이다.</p>
+<h3 id="rustc로-단일-파일을-컴파일하기"><a class="header" href="#rustc로-단일-파일을-컴파일하기">rustc로 단일 파일을 컴파일하기</a></h3>
+<p>예제 2.1은 짧지만 완전한 러스트 프로그램이다. 이를 실행 프로그램으로 변환하기 위해 컴파일러라는 소프트웨어를 사용한다. 컴파일러의 역할을 소스 코드를 기계 코드로 변환하고 해당 코드가 운영 체제와 CPU에서 실행
+가능하도록 하는 많은 일을 관리하는 것이다. 러스트 컴파일러는 rustc다.</p>
+<p>예제 2.1 아마도 가장 짧고 유효한 러스트 프로그램</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    println!(&quot;ok&quot;);
+}</code></pre></pre>
+<p>러스트로 작성한 단일 파일을 컴파일해서 실행 파일을 만들려면 다음과 같은 절차를 따른다.</p>
+<ol>
+<li>소스 코드를 파일에 저장한다. 이 경우에는 파일 이름을 <code>ok.rs</code>라고 한다.</li>
+<li>소스 코드가 <code>main()</code>함수를 포함하고 있는지 확인한다.</li>
+<li>터미널, cmd.exe, 파워셸, bash, zsh 등 셸 창을 연다.</li>
+<li><code>rustc &lt;file&gt;</code> 명령을 실행한다. 이때 <code>&lt;file&gt;</code>은 컴파일하려고 하는 파일 이름이다.</li>
+</ol>
+<p><code>rustc</code>로 컴파일에 성공하면 콘솔에는 아무것도 출력되지 않는다. <code>rustc</code>는 주어진 파일 이름을 이용해서 실행 파일의 이름을 결정한다.</p>
+<h3 id="카고로-러스트-프로젝트-컴파일하기"><a class="header" href="#카고로-러스트-프로젝트-컴파일하기">카고로 러스트 프로젝트 컴파일하기</a></h3>
+<p>대부분의 러스트 프로젝트는 여러 개의 파일로 이루어진다. 여기에는 일반적으로 의존성이 걸린 패키지도 포함된다. 이를 위해 우리는 카고라는 <code>rustc</code>보다 더 높은 수준의 도구를 사용할 것이다.
+카고는 <code>rustc</code>(를 포함한 다른 도구)를 사용하는 법을 알고 있다.</p>
+<p><code>rustc</code>로 단일 파일을 컴파일하는 작업 흐름에서 카고로 다수의 파일을 관리하는 방식으로 이전하려면 두 단계 작업이 필요하다. 첫 번째로 원래 파일을 빈 디렉터리로 옮긴다. 그런 다음 <code>cargo init</code>
+명령을 실행한다. <code>rustc</code>와 달리 컴파일된 실행 파일은 <code>&lt;project&gt;/target</code> 하위 디렉터리에 생성된다. 또 다른 차이점은 카고가 기본적으로 훨씬 더 많은 출력을 제공한다는 점이다.</p>
+<h2 id="러스트-문법-개요"><a class="header" href="#러스트-문법-개요">러스트 문법 개요</a></h2>
+<p>러스트는 문법 면에서는 진부하고 예상이 가능하다. 러스트는 변수, 숫자, 함수 및 다른 언어에서 볼 수 있는 낯익은 것들을 가지고 있다. 예를 들어 블록은 중괄호(<code>{}</code>)로 구분하고, 단일 등호 기호(<code>=</code>)를
+할당 연산자로 사용하며, 공백 제한이 없다.</p>
+<h3 id="변수-정의와-함수-호출"><a class="header" href="#변수-정의와-함수-호출">변수 정의와 함수 호출</a></h3>
+<p>간단한 예제를 통해 몇 가지 기본적인 사항을 살펴보자. 타입 애너테이션을 이용해 변수를 정의하고 함수를 호출하는 내용이다. 예제 2.2는 <code>( a + b ) + ( c + d ) = 90</code>을 출력하는 프로그램이다.
+예제의 2~5행에서 볼 수 있듯이 데이터 타입을 정수로 선언하는 문법이 여러 가지가 있다.</p>
+<p>예제 2.2 변수와 타입 선언을 사용해 정수를 더하기</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {             // 1
+    let a = 10;         // 2
+    let b: i32 = 20;    // 3
+    let c = 30i32;      // 4
+    let d = 30_i32;     // 5
+    let e = add(add(a, b), add(c, d));
+
+    println!(&quot;( a + b ) + ( c + d ) = {}&quot;, e);
+}
+
+fn add(i: i32, j: i32) -&gt; i32 {     // 6
+    i + j                           // 7
+}</code></pre></pre>
+<blockquote>
+<ol>
+<li>러스트에서는 <code>main()</code>의 위치를 융통성 있게 둘 수 있다.</li>
+<li>데이터 타입은 컴파일러가 추론한다.</li>
+<li>또는 변수 선언 시 프로그래머가 직접 지정한다.</li>
+<li>숫자 데이터 타입은 해당 리터럴 형식에 타입 애너테이션을 붙일 수 있다.</li>
+<li>숫자에는 밑줄(<code>_</code>)을 쓸 수 있다. 가독성을 좋게 하기 위해서일 뿐 그 외 기능적인 요소는 없다.</li>
+<li>함수 정의에 타입 선언은 반드시 있어야 한다.</li>
+<li>함수의 최종 표현식 결과를 반환하기 위해 별도의 <code>return</code>문은 필요하지 않다.</li>
+</ol>
+<p>예제에서 <code>add()</code>함수 선언 시 마지막에 세미콜론을 붙이지 않도록 주의하라. 세미콜론을 붙이면 의미가 달라져, <code>i32</code>타입 결과가 아니라 <code>()</code>(유닛) 타입 결과를 반환하게 된다.</p>
+</blockquote>
+<p>1행 <code>fn main() {</code>에서 <code>fn</code> 키워드로 함수 선언이 시작된다. 러스트 프로그램은 <code>main()</code>에서 시작한다. 이 함수는 인자가 없고 어떤 값도 반환하지 않는다. <code>main()</code>은 기본적으로 <code>()</code>(
+유닛)를 반환하지만 <code>Result</code>도 반환할 수 있다. 어휘 범위(lexical scope)라고 하는 코드 블록은 중괄호 (<code>{</code>와 <code>}</code>)로 정의된다.</p>
+<p>2행 <code>let a = 10;</code>에서 <code>let</code>을 사용하여 변수 바인딩을 선언한다. 변수는 기본적으로 불변 항목으로, 읽기/쓰기가 아니라 읽기 전용이다. 마지막으로 문장(statement)은 세미콜론(<code>;</code>)으로
+끝난다.</p>
+<p>3행 <code>let b: i32 = 20;</code>에서 컴파일러에 특정 데이터 타입을 지정할 수 있다. 컴파일러가 사용자 대신 고유한 타입을 추론할 수 없을 때 이 작업이 필요하다.</p>
+<p>4행 <code>let c = 30i32;</code>에서 러스트의 숫자 리터럴에는 타입 애너테이션을 넣을 수 있다. 복잡한 수식일 때 유용하다.</p>
+<p>5행 <code>let c = 30_i32;</code>을 보면 러스트에서는 숫자 리터럴 내에서 밑줄을 사용할 수 있다. 이는 가독성을 높이기 위해서일 뿐 컴파일러에는 중요하지 않다.</p>
+<p>6행 <code>let e = add(add(a, b), add(c, d));</code>에서 함수를 호출하는 방식은 대부분의 다른 프로그래밍 언어에서 경험하는 것과 비슷하다.</p>
+<p>8행 <code>println!(&quot;( a + b ) + ( c + d ) = {}&quot;, e);</code>에서 <code>println!()</code>은 함수 같아 보이지만 값이 아닌 코드를 반환하는 매크로다. 콘솔로 출력할 때 모든 입력 데이터 타입은
+고유한 방식으로 텍스트 문자열로 표현된다. <code>println!()</code>은 이 인자들에 적용할 정확한 메서드를 결정한다.</p>
+<p>문자열은 작은 따옴표(<code>'</code>)대신 큰따옴표(<code>&quot;</code>)를 사용한다. 러스트는 단일 문자에 작은따옴표를 사용하며 이는 별개의 타입인 <code>char</code>이다. 또한 러스트에서는 문자열을 형식화할 때 자리 표시자로
+C의 <code>printf</code>처럼 <code>%s</code>같은 기호를 쓰는 대신 <code>{}</code>를 사용한다.</p>
+<p>마지막으로 11행 <code>fn add(i: i32, j: i32) -&gt; i32 {</code>을 보면 러스트의 함수 정의 문법은 명시적 타입 선언을 사용하는 프로그래밍 언어와 비슷하다. 쉼표로 매개 변수를 구분하고, 타입 선언은
+변수 이름 뒤에 온다. 얇은 화살표(<code>-&gt;</code>)라 부르는 문법은 반환 타입을 나타낸다.</p>
+<h2 id="숫자"><a class="header" href="#숫자">숫자</a></h2>
+<p>숫자 타입을 생성하는 방법과 이러한 타입에 대한 연산을 수행하는 방식에 대해 알아보자.</p>
+<h3 id="정수와-부동-소수점-수"><a class="header" href="#정수와-부동-소수점-수">정수와 부동 소수점 수</a></h3>
+<p>러스트는 정수(1, 2, ...)와 부동 소수점 수(1.0, 1.1, ...)를 만들 때 비교적 관습적인 구문을 쓴다. 숫자에 대한 연산은 중위(infix) 표기법을 사용한다. 즉, 수식은 대부분의 프로그래밍
+언어에서 흔히 볼 수 있는 방식과 비슷하다. 여러 가지 타입에 대한 덧셈을 할 때 러스트는 동일한 토큰(<code>+</code>)을 이용한다. 이를 연산자 오버로딩이라고 한다. 다만 다음과 같이 몇 가지 면에서 다른 언어와 분명한
+차이가 있다.</p>
+<ul>
+<li>러스트에는 다양한 숫자 타입이 포함된다. 바이트 단위로 크기를 선언하는 데 익숙해질 것이며, 이는 해당 타입이 나타낼 수 있는 수의 범위가 어디까지인지 그리고 음수를 나타낼 수 있는지에 영향을 끼친다.</li>
+<li>타입 간 변환은 언제나 명시적으로 일어난다. 러스트는 16비트 정수를 32비트 정수로 자동 변환하지 않는다.</li>
+<li>러스트의 수는 메서드를 가질 수 있다. 예를 들어 24.5를 반올림하려면 러스트 프로그래머는 <code>round(24.5_f32)</code>가 아니라 <code>24.5_f32.round()</code>를 쓴다. 타입 접미사는 명확한 타입을
+지정하기 위해 필요하다.</li>
+</ul>
+<p>예제 2.3 러스트의 숫자 리터럴과 기본 수치 연산</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    let twenty = 20;            // 1
+    let twenty_one: i32 = 21;   // 2
+    let twenty_two = 22i32;     // 3
+    
+    let addition = twenty + twenty_one + twenty_two;
+    println!(&quot;{} + {} + {} = {}&quot;, twenty, twenty_one, twenty_two, addition);
+    
+    let one_million: i64 = 1_000_000;       // 4
+    println!(&quot;{}&quot;, one_million.pow(2));     // 5
+    
+    let forty_twos = [  // 6
+        42.0,           // 7
+        42f32,          // 8
+        42.0_f32,       // 9
+    ];
+    
+    println!(&quot;{:02}&quot;, forty_twos[0]);   // 10
+}</code></pre></pre>
+<blockquote>
+<ol>
+<li>러스트는 타입이 지정되어 있지 않은 경우 사용자를 대신하여 해당 타입을 추론한다.</li>
+<li>타입 애너테이션(<code>i32</code>)을 붙여 타입을 지정한다.</li>
+<li>타입 접미사를 이용해 타입을 지정한다.</li>
+<li>밑줄은 단지 가독성을 높여 주는 용도로 컴파일러는 이를 무시한다.</li>
+<li>숫자는 메서드를 가진다.</li>
+<li>배열은 모두가 같은 타입이어야 하며 대괄호로 묶어 생성한다.</li>
+<li>명시적인 타입 애너테이션이 없는 부동 소수점 리터럴은 상황에 따라 32비트 또는 64비트가 된다.</li>
+<li>부동 소수점 리터럴에도 타입 접미사가 붙을 수 있다.</li>
+<li>부동 소수점 리터럴과 타입 접미사 사이에 추가적인 밑줄도 쓸 수 있다.</li>
+<li>배열 내의 요소는 0부터 시작하여 숫자로 인덱싱할 수 있다.</li>
+</ol>
+</blockquote>
+<h3 id="이진-팔진-십육진법을-이용하는-정수"><a class="header" href="#이진-팔진-십육진법을-이용하는-정수">이진, 팔진, 십육진법을 이용하는 정수</a></h3>
+<p>러스트는 기본적으로 이진수(binary), 팔진수(octal), 십육진수(hexadecimal)로 정수 리터럴을 정의할 수 있다. 이 표기법은 <code>println!</code>과 같은 형식화 매크로에서도 사용할 수 있다. 예제
+2.4에는 세 가지 스타일이 있다.</p>
+<p>예제 2.4 이진, 팔진, 십육진 숫자 리터럴</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    let three = 0b11;           // 1
+    let thirty = 0o36;          // 2
+    let three_hundred = 0x12C;  // 3
+
+    println!(&quot;base 10: {} {} {}&quot;, three, thirty, three_hundred);
+    println!(&quot;base 2:  {:b} {:b} {:b}&quot;, three, thirty, three_hundred);
+    println!(&quot;base 8:  {:o} {:o} {:o}&quot;, three, thirty, three_hundred);
+    println!(&quot;base 16: {:x} {:x} {:x}&quot;, three, thirty, three_hundred);
+}</code></pre></pre>
+<blockquote>
+<ol>
+<li>0b 접두사는 이진수임을 나타낸다.</li>
+<li>0o 접두사는 팔진수임을 나타낸다.</li>
+<li>0x 접두사는 십육진수임을 나타낸다.</li>
+</ol>
+</blockquote>
+<p>&lt;스칼라 수를 나타내는 러스트 타입&gt;</p>
+<div class="table-wrapper"><table><thead><tr><th>타입</th><th>설명</th></tr></thead><tbody>
+<tr><td><code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>i128</code></td><td>8비트에서 128비트 크기의 부호 있는 정수</td></tr>
+<tr><td><code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code></td><td>8비트에서 128비트 크기의 부호 없는 정수</td></tr>
+<tr><td><code>f32</code>, <code>f64</code></td><td>32비트, 64비트 종류가 있는 부동 소수점 수</td></tr>
+<tr><td><code>isize</code>, <code>usize</code></td><td>CPU의 '네이티브' 크기를 따르는 정수. 예를 들어 64비트 CPU에서 <code>usize</code>와 <code>isize</code>는 64비트다.</td></tr>
+</tbody></table>
+</div>
+<p>러스트에는 모든 숫자 타입이 포함되어 있다. 이 타입들은 몇 가지로 분류된다.</p>
+<ul>
+<li>부호 있는 정수(<code>i</code>)는 양의 정수뿐 아니라 음의 정수도 나타낸다.</li>
+<li>부호 없는 정수(<code>u</code>)는 양의 정수만 나타낼 수 있지만, 부호 있는 정수에 비해 2배까지 큰 수를 나타낸다.</li>
+<li>부동 소수점 타입(<code>f</code>)은 무한대, 음의 무한대, '수가 아님(not a number, NaN)' 값을 표시하는 특수한 비트 패턴이 있는 실수(real number)를 나타낸다.</li>
+</ul>
+<p>정수의 크기는 램(RAM)과 CPU에서 데이터 타입이 사용하는 비트 수다. <code>u32</code>와 <code>i8</code>의 예처럼 공간을 더 많이 차지하는 타입은 더 넓은 범위를 나타낼 수 있다. 그러나 아래의 표에서 볼 수 있는 것처럼
+작은 숫자에 대해서는 추가로 0을 저장해야 하는 낭비가 생긴다.</p>
+<p>&lt;같은 수를 표시할 수 있는 다수의 비트 패턴&gt;</p>
+<div class="table-wrapper"><table><thead><tr><th>수</th><th>데이터 타입</th><th>메모리상 비트 패턴</th></tr></thead><tbody>
+<tr><td>20</td><td><code>u32</code></td><td>00000000000000000000000000010100</td></tr>
+<tr><td>20</td><td><code>i8</code></td><td>00010100</td></tr>
+<tr><td>20</td><td><code>f32</code></td><td>01000001101000000000000000000000</td></tr>
+</tbody></table>
+</div>
+<p>숫자만 언급했지만 패턴 매칭 프로그램의 프로토타입을 만들기에 충분할 정도로 러스트에 대해 알아보았다. 하지만 프로그램을 만들기 전에 수의 비교에 대해 살펴보자.</p>
+<h3 id="수의-비교"><a class="header" href="#수의-비교">수의 비교</a></h3>
+<p>러스트의 숫자 타입은 아마도 이미 익숙한, 다양한 비교 연산자를 지원한다. 이러한 비교 연산은 아직 살펴보지 않은 기능을 통해 제공된다. 바로 트레이트(trait)다.</p>
+<div class="table-wrapper"><table><thead><tr><th>연산자</th><th>러스트 구문</th><th>예시</th></tr></thead><tbody>
+<tr><td>미만, ~보다 작다(&lt;)</td><td><code>&lt;</code></td><td><code>1.0 &lt; 2.0</code></td></tr>
+<tr><td>초과, ~보다 크다(&gt;)</td><td><code>&gt;</code></td><td><code>2.0 &gt; 1.0</code></td></tr>
+<tr><td>같다(=)</td><td><code>==</code></td><td><code>1.0 == 1.0</code></td></tr>
+<tr><td>같지 않다(!=)</td><td><code>!=</code></td><td><code>1.0 != 2.0</code></td></tr>
+<tr><td>같거나 작다, 이하(&lt;=)</td><td><code>&lt;=</code></td><td><code>1.0 &lt;= 2.0</code></td></tr>
+<tr><td>같거나 크다, 이상(&gt;=)</td><td><code>&gt;=</code></td><td><code>2.0 &gt;= 1.0</code></td></tr>
+</tbody></table>
+</div>
+<p>여기에는 몇 가지 주의해야 할 점이 있다.</p>
+<h4 id="서로-다른-데이터-타입은-비교할-수-없다"><a class="header" href="#서로-다른-데이터-타입은-비교할-수-없다">서로 다른 데이터 타입은 비교할 수 없다</a></h4>
+<p>러스트의 타입 안전에 대한 요구 사항으로 서로 다른 데이터 타입 사이의 비교가 금지된다. 예를 들어 다음 코드는 컴파일되지 않는다.</p>
+<pre><code class="language-rust  noplayground">fn main() {
+    let a: i32 = 10;
+    let b: u16 = 100;
+    
+    if a &lt; b {
+        println!(&quot;Ten is less than one hundred.&quot;);
+    }
+}</code></pre>
+<p>컴파일러 오류를 해결하려면 <code>as</code>연산자를 사용하여 피연산자 중 하나를 다른 타입으로 변환해야 한다. 다음 코드에서는 <code>b as i32</code>로 변환했다.</p>
+<pre><code class="language-rust  noplayground">fn main() {
+    let a: i32 = 10;
+    let b: u16 = 100;
+    
+    if a &lt; (b as i32) {
+        println!(&quot;Ten is less than one hundred.&quot;);
+    }
+}</code></pre>
+<p>작은 타입을 큰 타입(예: 16비트 타입을 32비트 타입)으로 변환하는 것이 가장 안전하다. 이것을 승격(promotion)이라고 부르기도 한다. 위의 경우, <code>a</code>를 <code>u16</code>으로 강등(demote)할 수 있었지만
+그러한 처리는 일반적으로 더 위험하다.</p>
+<blockquote>
+<p>프로그램이 의도하지 않은 동작을 할 수 있으므로 타입 변환은 주의해서 사용해야 한다. 예를 들어 <code>300_i32 as i8</code>은 44를 반환한다.</p>
+</blockquote>
+<p>경우에 따라서는 <code>as</code> 키워드를 사용하는 것이 지나친 제약이 될 수 있다. 어느 정도 번거로운 과정을 거치면 변환 과정을 완전히 통제할 수 있다. 다음 예제에서는 변환이 실패할 때 <code>as</code> 키워드 대신에 러스트
+메서드를 사용했다.</p>
+<p>예제 2.5 데이터 타입 간 변환에 try_into() 메서드 사용하기</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">use std::convert::TryInto;    // 1
+
+fn main() {
+    let a: i32 = 10;
+    let b: u16 = 100;
+
+    let b_ = b.try_into()
+              .unwrap();      // 2
+
+    if a &lt; b_ {
+        println!(&quot;Ten is less than one hundred.&quot;);
+    }
+}</code></pre></pre>
+<blockquote>
+<ol>
+<li><code>try_into()</code>메서드가 구현된 <code>u16</code>과 같은 타입에 해당 메서드를 쓸 수 있게 한다. 2021 에디션에서는 프렐류드(prelude)에 추가되어 이 구문을 사용하지 않아도 된다.</li>
+<li><code>try_into()</code>는 변환 시도의 결과로 <code>Result</code>타입을 반환한다.</li>
+</ol>
+</blockquote>
+<p>예제 2.5에서는 두 가지 새로운 러스트의 개념인 트레이트와 오류 처리가 등장했다. 1행에서 <code>use</code>키워드는 <code>std::convert::TryInto</code>트레이트를 지역 범위로 가져온다. 이로써 <code>try_into()</code>
+메서드를 <code>b</code>변수에서 쓸 수 있다. 왜 이런 일이 일어나는지에 대한 자세한 설명은 생략한다. 당분간은 트레이트를 메서드의 집합으로 간주한다. 객체 지향 개발 경험이 있다면 트레이트를 추상 클래스나 인터페이스로
+생각해도 된다. 함수형 언어 프로그래밍 경험이 있다면 트레이트를 타입 클래스(type class)로 생각해도 된다.</p>
+<p>7행은 러스트에서의 오류 처리를 간략하게나마 보여 준다. <code>b.try_into()</code>는 <code>Result</code>안에 <code>i32</code>값을 감싸 반환한다.<code>Result</code>는 3장에서 자세히 알아보자. 이는 성공값 또는 오류값을 포함할 수
+있다. <code>unwrap()</code>메서드는 성공값을 처리하며 여기서 <code>b</code>의 값을 <code>i32</code>로 반환한다. <code>u16</code>에서 <code>i32</code>로 변환하는 데 실패하면 <code>unwrap()</code>이 호출되고 프로그램이 중단된다. 책을 읽어 나가다
+보면 프로그램의 안정성을 해치지 않고 <code>Result</code>를 좀 더 안전하게 처리하는 방법을 배우게 될 것이다!</p>
+<p>러스트의 눈에 띄는 특징 중 하나는 해당 트레이트가 지역 범위 내에 있을 때만 타입의 메서드를 호출할 수 있다는 점이다. 덧셈과 할당 같은 일반적인 연산 작업은 암묵적인 프렐류드(prelude: 기본적으로 가져오는
+표준 모듈)를 통해 가져오므로 명시적인 가져오기(import)가 없어도 된다.</p>
+<blockquote>
+<p>지역 범위에 무엇이 기본으로 포함되는지 알고 싶다면, <code>std::prelude</code>모듈을 살펴봐야 한다. 해당 문서는 http://doc.rust-lang.org/std/prelude/index.html 에서 찾을
+수 있다.</p>
+</blockquote>
+<blockquote>
+<h4 id="부동-소수점-수의-위험성"><a class="header" href="#부동-소수점-수의-위험성">부동 소수점 수의 위험성</a></h4>
+<p>부동 소수점 타입(예를 들어 <code>f32</code>와 <code>f64</code>)은 부주의하게 사용하면 심각한 오류를 일으킨다. 여기에는 (적어도) 두 가지 이유가 있다.</p>
+<ul>
+<li>이 타입들은 대개 실제 수의 근사값을 표현한다. 부동 소수점 타입은 이진수로 구현되지만, 우리는 이를 십진수로 계산하고자 한다. 이런 불일치 때문에 애매한 상황이 일어난다. 더욱이 실수를 표현한다고 하지만
+부동
+&gt; 소수점 값의 정밀도는 제한적이다. 모든 실수를 표현하려면 무한한 정밀도가 필요하다.</li>
+<li>이 타입들은 비직관적인 의미를 가지는 값을 표현한다. 정수와 달리 부동 소수점 타입에는 설계로 인해 잘 작동하지 않는 값이 있다. 공식적으로 이 타입에는 부분적인 동등 관계만 있다. 이것은 러스트의 타입
+시스템에
+&gt; 반영되어 있는데, <code>f32</code>와 <code>f64</code>타입은 <code>std::cmp::PartialEq</code>트레이트만 구현하지만, 다른 숫자 타입은 <code>std::cmp::Eq</code>도 함께 구현한다.</li>
+</ul>
+<p>이러한 위험을 방지하기 위해 다음 두 가지 사항을 지켜야 한다.</p>
+<ul>
+<li>부동 소수점 수의 동등성을 검사하는 일은 피한다.</li>
+<li>결과가 수학적으로 정의되지 않을(undefined) 수 있는 경우 주의한다.</li>
+</ul>
+<p>부동 소수점 수를 비교하는 데 동등 비교를 사용하면 큰 문제가 된다. 부동 소수점 수는 이진수를 사용하는 계산 시스템으로 구현되지만, 십진수 숫자에 대한 연산을 수행할 때가 있다. 0.1과 같은 많은 값이
+이진수로
+정확하게 표현되지 않기 때문에 문제가 된다.</p>
+<p>이 문제를 알아보기 위해 다음 코드를 살펴보자. 실행 시 성공해야 할까, 아니면 충돌이 나야 할까? (0.1 + 0.2 = 0.3)은 수학적 동어 반복으로 항상 참이지만, 다음 예제를 실행하면 대부분의 시스템에서
+프로그램이 종료된다.</p>
+<pre><code class="language-rust  noplayground">fn main() {                       // 1
+    assert!(0.1 + 0.2 == 0.3);    //
+}                                 //</code></pre>
+<blockquote>
+<ol>
+<li><code>assert!</code>는 인자가 참으로 평가되지 않을 때 프로그램을 강제 종료한다.</li>
+</ol>
+</blockquote>
+<p>하지만 모든 경우가 다 그런 것은 아니다. 데이터 타입은 프로그램 정상 실행 여부와 관련하여 영향을 줄 수 있다. 다음 코드는 각 값의 내부 비트 패턴을 조회하여 차이가 있는 위치를 찾는다. 그런 다음 이전
+예제의
+테스트를 <code>f32</code>와 <code>f64</code> 데이터 타입에 대해 수행한다. 여기에서는 단 하나의 테스트만 통과된다.</p>
+<p>예제 add_floats</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    let abc: (f32, f32, f32) = (0.1, 0.2, 0.3);
+    let xyz: (f64, f64, f64) = (0.1, 0.2, 0.3);
+
+    println!(&quot;abc (f32)&quot;);
+    println!(&quot; 0.1 + 0.2: {:x}&quot;, (abc.0 + abc.1).to_bits());
+    println!(&quot; 0.3: {:x}&quot;, (abc.2).to_bits());
+    println!();
+
+    println!(&quot;xyz (f64)&quot;);
+    println!(&quot; 0.1 + 0.2: {:x}&quot;, (xyz.0 + xyz.1).to_bits());
+    println!(&quot; 0.3: {:x}&quot;, (xyz.2).to_bits());
+    println!();
+
+    assert!(abc.0 + abc.1 == abc.2);    // 1
+    assert!(xyz.0 + xyz.1 == xyz.2);    // 2
+}</code></pre></pre>
+<blockquote>
+<ol>
+<li>정상적으로 수행된다.</li>
+<li>충돌이 발생한다.</li>
+</ol>
+</blockquote>
+<p>실행하면 프로그램은 짧은 출력을 잘 만들어 내다가 오류가 나온다. 그 후에 프로그램은 종료되는데 <code>f64</code>값의 결과를 비교하는 16행에서 중단된다.</p>
+<pre><code class="language-text">abc (f32)
+ 0.1 + 0.2: 3e99999a
+ 0.3: 3e99999a
+
+xyz (f64)
+ 0.1 + 0.2: 3fd3333333333334
+ 0.3: 3fd3333333333333
+
+thread 'main' panicked at 'assertion failed: xyz.0 + xyz.1 == xyz.2', src\main.rs:16:5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: process didn't exit successfully: `target\debug\add_floats.exe` (exit code: 101)
+</code></pre>
+<p>일반적으로 수학적 연산이 실제 수학 결과에 대비하여 허용 가능한 오차 범위 내에 있는지 시험하는 것이 더 안전하다. 이 범위를 일반적으로 엡실론이라고 한다.</p>
+<p>러스트에는 부동 소수점 값을 비교할 때 사용되는 몇 가지 허용치가 있다. 이러한 허용치를 <code>f32::EPSILON</code>과 <code>f64::EPSILON</code>으로 정의한다. 다음 짧은 예에서 러스트가 내부적으로 어떻게
+동작하는지
+좀 더 자세히 볼 수 있다.</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    let result: f32 = 0.1 + 0.1;
+    let desired: f32 = 0.2;
+    let absolute_difference = (desired - result).abs();
+    assert!(absolute_difference &lt;= f32::EPSILON);
+}</code></pre></pre>
+<p>이 예에서 실제로 일어나는 일은 흥미롭지만 대부분은 무의미한 것들이다. 러스트 컴파일러는 비교 연산을 CPU에서 처리하는 코드로 전환한다. 부동 소수점 관련 연산은 칩 내 전용 하드웨어를 사용하여 구현된다.</p>
+<p>음수의 제곱근(<code>-42.0.sqrt()</code>)을 구하는 것처럼 수학적으로 정의되지 않은 결과가 생기는 연산은 특정 문제를 일으킨다. 부동 소수점 타입에는 이런 경우를 처리하기 위한 '숫자가 아님'값(
+러스트에서는 <code>NAN</code>값으로 표시)이 포함되어 있다.</p>
+<p><code>NAN</code>값은 다른 숫자들을 오염시킨다. <code>NAN</code>과 상호 작용하는 거의 모든 작업은 <code>NAN</code>을 반환한다. 또 유의해야 할 점은 정의상 <code>NAN</code>값끼리는 결코 같지 않다는 점이다. 다음 프로그램을 실행하면 항상
+비정상적으로 강제 종료된다.</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    let x = (-42.0_f32).sqrt();
+    assert_eq!(x, x);
+}</code></pre></pre>
+<p>방어적으로 프로그래밍 하려면 <code>is_nan()</code>과 <code>is_finite()</code>메서드를 사용하자. 수학적 오류를 조용히 처리하는 대신 오류 상황을 일으켜야 문제의 원인을 찾아 고칠 수 있다.
+다음은 <code>is_finite()</code>메서드를 사용해 이런 상황을 일으키는 방법이다.</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">fn main() {
+    let x: f32 = 1.0 / 0.0;
+    assert!(x.is_finite());
+}</code></pre></pre>
+</blockquote>
+<h3 id="유리수-복소수-그리고-다른-숫자-타입"><a class="header" href="#유리수-복소수-그리고-다른-숫자-타입">유리수, 복소수 그리고 다른 숫자 타입</a></h3>
+<p>러스트의 표준 라이브러리는 비교적 작다. 다른 언어에서 자주 사용할 수 있는 몇몇 숫자 타입은 빠져 있다. 여기에는 다음과 같은 것이 있다.</p>
+<ul>
+<li>유리수 및 복소수를 다루는 데 쓰는 많은 수학적 객체</li>
+<li>매우 크거나 매우 작은 수를 표현할 수 있는 임의의 크기를 가지는 정수와 임의의 정밀도를 가지는 부동 소수점 수</li>
+<li>화폐 단위에 쓰이는 고정 소수점 수</li>
+</ul>
+<p>이러한 특수한 숫자 타입을 사용하려면 <code>num</code>크레이트를 사용한다. 크레이트는 러스트의 패키지를 의미한다. 오픈 소스 크레이트는 http://crates.io 저장소에서 공유되며, 이곳에서 <code>num</code>크레이트를 카고로
+받는다.</p>
+<p>예제 2.6에서는 복소수 두 개를 더한다. 복소수는 '실수부'와 '허수부'로 이루어져 있으며 &lt;실수부&gt; + &lt;허수부&gt;i로 표기한다. 예를들어 2.1 + -1.2i 는 하나의 복소수다.</p>
+<p>예제 2.6 복소수로 값을 계산하기</p>
+<pre><pre class="playground"><code class="language-rust  editable edition2021">use num::complex::Complex;      // 1
+
+fn main() {
+    let a = Complex { re: 2.1, im: -1.2 };    // 2
+    let b = Complex::new(11.1, 22.2);         // 3
+    let result = a + b;
+
+    println!(&quot;{} + {}i&quot;, result.re, result.im);   // 4
+}</code></pre></pre>
+<blockquote>
+<ol>
+<li><code>use</code>키워드로 <code>Complex</code>타입을 지역 범위로 가져온다.</li>
+<li>모든 러스트 타입은 리터럴 구문을 가지고 있다.</li>
+<li>대부분의 데이터 타입은 정적 메서드 <code>new()</code>를 구현한다.</li>
+<li>점 연산자(<code>.</code>)를 이용해서 필드값에 접근한다.</li>
+</ol>
+</blockquote>
+<p>예제의 몇 가지 부분을 살펴보자.</p>
+<ul>
+<li><code>use</code>키워드는 크레이트를 지역 범위로 가져오고, 이름 공간 연산자(<code>::</code>)는 무엇을 가져올지 제한한다. 이 경우 <code>Complex</code>라는 단일한 타입만 필요로 한다.</li>
+<li>러스트에는 생성자가 없는 대신 모든 타입에 리터럴 형태가 있다. 타입 이름(<code>Complex</code>)을 쓰고 필드(<code>re</code>, <code>im</code>)값(예: 2.1 또는 -1.2)을 중괄호(<code>{}</code>)로 감싸서 해당 타입을 초기화한다.</li>
+<li>간결함을 위해 많은 타입이 <code>new()</code>메서드를 구현한다. 그러나 이러한 관례가 러스트 언어의 일부는 아니다.</li>
+<li>러스트 프로그래머는 필드를 사용할 때 점 연산자(<code>.</code>)를 사용한다. 예를 들어 <code>num::complex::Complex</code>타입에는 필드가 두 개 있는데, 실수부를 나타내는 <code>re</code>와 허수부를 나타내는 <code>im</code>
+이다. 둘 모두 점 연산자로 접근할 수 있다.</li>
+</ul>
+<p>예제 2.6에는 몇 가지 새로운 명령도 나온다. 두 가지 방식으로 원시 데이터 타입이 아닌 데이터 타입을 초기화한다.</p>
+<p>한 가지는 러스트 언어의 일부로 제공되는 리터럴 구문(4행)이다. 다른 방법은 관례에 의해 구현될 뿐 언어의 일부로는 정의되지 않는 <code>new()</code>정적 메서드다(5행). 정적 메서드는 타입에 사용할 수 있는 함수이지만
+해당 타입의 인스턴스에는 사용할 수 없다.<sup>*</sup></p>
+<p><sup>*</sup>러스트는 객체 지향적이지 않지만(예: 하위 클래스를 생성할 수 없음), 해당 분야에서 가져온 몇 가지 용어를 사용한다. 러스트 프로그래머가 인스턴스, 메서드, 객체에 대해 이야기하는 일은
+일상적이다.</p>
+<p>두 번째 방법은 라이브러리 작성자가 타입의 <code>new()</code>메서드를 써서 기본값을 설정하기 때문에 선호되는 경우가 많다. 또한 군더더기도 적다.</p>
+<p>지금까지 기본 제공 숫자 타입과 서드 파티 라이브러리 타입을 쓰는 방법에 대해 알아보았다.</p>
+<blockquote>
+<h4 id="프로젝트에-서드-파티-의존성을-추가하는-빠른-방법"><a class="header" href="#프로젝트에-서드-파티-의존성을-추가하는-빠른-방법">프로젝트에 서드 파티 의존성을 추가하는 빠른 방법</a></h4>
+<p><code>cargo add</code>명령을 활성화하는 <code>cargo-edit</code>크레이트를 설치할 것을 추천한다. 다음과 같이 실행하면 된다.</p>
+<pre><code class="language-text">$ cargo install cargo-edit
+</code></pre>
+<p>지금까지는 <code>Cargo.toml</code>에 의존성을 수동으로 추가했다. <code>cargo add</code>명령은 사용자 대신 파일을 올바르게 고쳐 주므로 이런 절차를 간소화할 수 있다.</p>
+<pre><code class="language-text">$ cargo add num
+</code></pre>
+</blockquote>
+<h2 id="흐름-제어"><a class="header" href="#흐름-제어">흐름 제어</a></h2>
+<p>프로그램은 기본적으로 위에서 아래로 실행되는데 프로그래머가 이를 원치 않는 경우가 있다. 러스트에는 이런 경우 유용한 흐름 제어 체계가 있다.</p>
+<h3 id="for-반복의-중심축"><a class="header" href="#for-반복의-중심축">for: 반복의 중심축</a></h3>
+<p><code>for</code>반복문은 러스트에서 반복을 처리하는 핵심이다. 무한한 값을 가질 수 있는 경우를 포함하여 대상의 컬렉션에 대해 반복 처리하는 일은 간단하다. 기본 형태는 다음과 같다.</p>
+<pre><code class="language-rust  noplayground">for item in container {
+    // ...
+}</code></pre>
+<p>이 기본 형태를 사용하면 <code>container</code>의 각 연속 요소를 개별 <code>item</code>으로 사용할 수 있다. 이런 식으로 사용하기 편한 고수준 구문으로 여러 동적 언어처럼 쓸 수 있다. 하지만 몇 가지 주의해야 한다.</p>
+<p>일반적인 생각과는 달리 블록이 끝나고 난 후 해당 컨테이너에 다시 접근할 수 없다. <code>container</code>변수는 지역 범위 내에 있지만 수명이 끝났다. 4장에서 알아보겠지만 러스트는 블록이 끝나면
+해당 <code>container</code>가 더 이상 필요하지 않다고 가정한다.</p>
+<p>나중에 프로그램에서 <code>container</code>를 다시 쓰고 싶다면 참조를 써야 한다. 참조를 붙여 쓰지 않으면 러스트는 해당 <code>container</code>가 더는 필요하지 않은 것으로 여긴다. 컨테이너에 참조를 붙여 다루려면
+다음과 같이 앰퍼샌드(<code>&amp;</code>)를 접두사로 붙인다.</p>
+<pre><code class="language-rust  noplayground">for item in &amp;container {
+    // ...
+}</code></pre>
+<p>반복문에서 <code>item</code>을 수정해야 하는 경우 <code>mut</code>키워드를 써야 가변 참조로 사용할 수 있다.</p>
+<pre><code class="language-rust  noplayground">for item in &amp;mut collection {
+    // ...
+}</code></pre>
+<p>구현에 대해 좀 더 자세히 얘기하자면 러스트의 <code>for</code>반복문은 컴파일러의 메서드 호출로 확장된다. 다음 표에서 볼 수 있듯이 <code>for</code>반복문의 세 가지 형태는 각각 서로 다른 방식으로 적용된다.</p>
+<div class="table-wrapper"><table><thead><tr><th>단축 형태</th><th>동등한 형태</th><th>접근</th></tr></thead><tbody>
+<tr><td><code>for item in collection</code></td><td><code>for item in IntoIterator::into_iter(collection)</code></td><td>소유권(ownership)</td></tr>
+<tr><td><code>for item in &amp;collection</code></td><td><code>for item in collection.iter()</code></td><td>읽기 전용</td></tr>
+<tr><td><code>for item in &amp;mut collection</code></td><td><code>for item in collection.iter_mut()</code></td><td>읽고 쓰기</td></tr>
+</tbody></table>
+</div>
+<h4 id="익명-반복문"><a class="header" href="#익명-반복문">익명 반복문</a></h4>
+<p>블록 내에서 지역 변수를 사용하지 않는 경우라면 관례적으로 밑줄(<code>_</code>)을 사용한다. 배제 범위(exclusive range: 값을 포함하지 않는 범위) 구분(<code>n..m</code>)이나 포함 범위(inclusive
+range: 값을 포함하는 범위)구문(<code>n..=m</code>)과 함께 사용하면 반복 횟수를 정확히 정할 수 있다. 다음은 익명 변수를 쓰는 예다.</p>
+<pre><code class="language-rust  noplayground">for _ in 0..10 {
+    // ...
+}</code></pre>
+<h4 id="인덱스-변수-관리를-피하는-법"><a class="header" href="#인덱스-변수-관리를-피하는-법">인덱스 변수 관리를 피하는 법</a></h4>
+<p>많은 프로그래밍 언어에서 각 반복이 끝날 때 증가하는 임시 변수를 사용하여 항목을 반복하는 것이 일반적이다. 관례적으로 이 변수의 이름은 <code>i</code>(index)다. 러스트에서는 다음과 같이 한다.</p>
+<pre><code class="language-rust  noplayground">let collection = [1, 2, 3, 4, 5];
+for i in 0..collection.len() {
+    let item = collection[i];
+    // ...
+}</code></pre>
+<p>이 예제는 러스트 문법에 맞는다. 그리고 반복문에서 <code>for item in collection</code>구문으로 <code>collection</code>을 직접 처리하기가 불가능할 때 필수다. 하지만 일반적으로 권장하는 방식은 아니다. 수동으로 접근하는 방법은 두 가지 문제를 일으킨다.</p>
+<ul>
+<li>성능 - <code>collection[index]</code>구문을 사용해 값을 인덱싱할 때 경계 확인으로 인한 런타임 비용이 발생한다. 즉, 러스트는 <code>index</code>가 현재 <code>collection</code>에 유효한지 확인한다. 이렇나 검사는 <code>collection</code>을 통해 직접 반복할 때는 필요하지 않다. 컴파일러는 컴파일 시 분석 작업으로 잘못된 접근이 불가능함을 입증할 수 있다.</li>
+<li>안전 - 계속해서 주기적으로 <code>collection</code>에 접근하는 경우 그 전에 <code>collection</code>이 변경되었을지도 모른다. <code>collection</code>에 <code>for</code>반복문을 직접 사용하면 러스트가 <code>collection</code>이 프로그램의 다른 부분에 의해 변경되지 않은 상태로 유지되도록 보장할 수 있다.</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="복합-데이터-타입"><a class="header" href="#복합-데이터-타입">복합 데이터 타입</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="수명-소유권-대여"><a class="header" href="#수명-소유권-대여">수명, 소유권, 대여</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="데이터-심화"><a class="header" href="#데이터-심화">데이터 심화</a></h1>
